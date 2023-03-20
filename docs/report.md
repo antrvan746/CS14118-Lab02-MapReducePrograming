@@ -1,5 +1,5 @@
 ---
-title: "Lab 01: A Gentle Introduction to Hadoop"
+title: "Lab 02: Map Reduce Programming"
 author: ["your-team-name"]
 date: "2023-02-17"
 subtitle: "CSC14118 Introduction to Big Data 20KHMT1"
@@ -13,17 +13,12 @@ book: true
 classoption: oneside
 code-block-font-size: \scriptsize
 ---
-# Lab 01: A Gentle Introduction to Hadoop
-
-## Setting up Single-node Hadoop Cluster
-
-## Introduction to MapReduce
+# Lab 02: Map Reduce Programming 
 
 
-## Running a warm-up problem: Word Count
 
-## Bonus
 
+# Example
 Insert table example:
 
 Server IP Address | Ports Open

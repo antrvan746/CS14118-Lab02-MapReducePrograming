@@ -53,10 +53,6 @@ public class CountConnectedComponentProgram {
                 sortedMap.put(keyItem, tmp);
             }
 
-//            for (Integer k : sortedMap.keySet()) {
-//                context.write(new Text(k.toString()), new Text(sortedMap.get(k).toString()));
-//            }
-
             for (Integer k : sortedMap.keySet()) {
                 Integer start = sortedMap.get(k).get(0);
                 if (start.compareTo(k) == 0) {
@@ -74,10 +70,6 @@ public class CountConnectedComponentProgram {
                     }
                 }
             }
-
-//            for (Integer k : result.keySet()) {
-//                context.write(new Text(k.toString()), new Text(result.get(k).toString()));
-//            }
 
             HashSet<Integer> components = new HashSet<>();
             boolean b = components.addAll(result.values());

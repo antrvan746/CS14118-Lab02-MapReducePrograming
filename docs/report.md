@@ -15,14 +15,116 @@ code-block-font-size: \scriptsize
 ---
 # Lab 02: Map Reduce Programming
 
+## 1. WordCount Program
+
+
+### Step 1: Program's solution
++ Import: 
+```java
+import java.io.IOException;
+import java.util.StringTokenizer;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+``` 
++ Mapper:
+```java
+  public static class TokenizerMapper
+       extends Mapper<Object, Text, Text, IntWritable>{
+
+    private final static IntWritable one = new IntWritable(1);
+    private Text word = new Text();
+
+    public void map(Object key, Text value, Context context
+                    ) throws IOException, InterruptedException {
+      StringTokenizer itr = new StringTokenizer(value.toString());
+      while (itr.hasMoreTokens()) {
+        word.set(itr.nextToken());
+        context.write(word, one);
+      }
+    }
+  }
+  ``` 
++ Reducer:
+
+```java
+  public static class IntSumReducer
+       extends Reducer<Text,IntWritable,Text,IntWritable> {
+    private IntWritable result = new IntWritable();
+
+    public void reduce(Text key, Iterable<IntWritable> values,
+                       Context context
+                       ) throws IOException, InterruptedException {
+      int sum = 0;
+      for (IntWritable val : values) {
+        sum += val.get();
+      }
+      result.set(sum);
+      context.write(key, result);
+    }
+  }
+```
++ Main:
+```java
+  public static void main(String[] args) throws Exception {
+    Configuration conf = new Configuration();
+    Job job = Job.getInstance(conf, "word count");
+    job.setJarByClass(WordCount.class);
+    job.setMapperClass(TokenizerMapper.class);
+    job.setCombinerClass(IntSumReducer.class);
+    job.setReducerClass(IntSumReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    System.exit(job.waitForCompletion(true) ? 0 : 1);
+  }
+}
+```
++ Explace:
++ In the mapper method: This mapper will take as input an Object (representing the key), and a Text (representing the value) and use the StringTokenizer to separate the words in the value. Then it sends each word to the Reducer with a value of 1.
++ In the reducer metho: This reducer will take the words from the Mapper and calculate the total number of occurrences of each word by adding the values of 1s together.
+
+### Step 2: Class Creation
+```bash
+jar -cvf WordCount.jar -C classes/ .
+```
+### Step 3: Create directory structure for program in Hadoop
+```bash
+hadoop fs -mkdir /WordCount
+hadoop fs -mkdir /WordCount/Input
+hadoop fs -put 'local input file's path ' /WordCount/Input
+```
++ Example input:
+
++ ![Input file](images/WordCountProgram/input.png)
+### Step 4: Create Jar File and deploy it to Hadoop
+```bash
+hadoop jar "Path to your local file .jar" WordCount /WordCount/Input /WordCount/Output
+```
+### Step 5: Final result
++ After succesfully calculating, we can check our result in HDFS like below: 
+
++ ![Output 1](images/WordCountProgram/output1.png)
+
++ ![Output 2](images/WordCountProgram/output2.png)
+
+
+
 
 ## 4. Patent Program
 
 
 ### Step 1: Program's solution
 
-+ Mapper:
 
++ Mapper:
 ```java
     public static class PatentMapper
             extends Mapper<Object, Text, Text, Text> {
@@ -124,6 +226,100 @@ hadoop jar "Path to your local file .jar" PatentProgram /PatentProgram/Input /Pa
 + ![Output 2](images/PatentProgram/input.png)
 
 
+
+## 5. MaxTemp Program
+
+
+### Step 1: Program's solution
++ Import: 
+```java
+import java.io.IOException;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+```
++ Mapper:
+```java
+  public static class MaxTemperatureMapper
+       extends Mapper<Object, Text, Text, IntWritable>{
+
+    private static final int MISSING = 9999;
+
+    public void map(Object key, Text value, Context context
+                    ) throws IOException, InterruptedException {
+      String line = value.toString();
+      String year = line.substring(0, 4);
+      int airTemperature = Integer.parseInt(line.substring(5));
+      context.write(new Text(year), new IntWritable(airTemperature));
+    }
+  }
+```
++ Reducer: 
+```java
+  public static class MaxTemperatureReducer
+       extends Reducer<Text,IntWritable,Text,IntWritable> {
+
+    public void reduce(Text key, Iterable<IntWritable> values,
+                       Context context
+                       ) throws IOException, InterruptedException {
+      int maxTemperature = Integer.MIN_VALUE;
+      for (IntWritable value : values) {
+        maxTemperature = Math.max(maxTemperature, value.get());
+      }
+      context.write(key, new IntWritable(maxTemperature));
+    }
+  }
+```
++ Main:
+```java
+  public static void main(String[] args) throws Exception {
+    Configuration conf = new Configuration();
+    Job job = Job.getInstance(conf, "max temperature");
+    job.setJarByClass(MaxTemp.class);
+    job.setMapperClass(MaxTemperatureMapper.class);
+    job.setCombinerClass(MaxTemperatureReducer.class);
+    job.setReducerClass(MaxTemperatureReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    System.exit(job.waitForCompletion(true) ? 0 : 1);
+  }
+}
+``` 
++ Explace:
++ In the mapper method, we extract the year and temperature from each input line and write them to the key/value pair. We do not need to verify the format of the input stream because in this case all the lines have the same format and we can simply use fixed indexes to extract the information. 
++ In the reduce method, we find the highest temperature for each year by traversing the list of pooled values for the same key.
+
+### Step 2: Class Creation
+```bash
+jar -cvf MaxTemp.jar -C classes/ .
+```
+### Step 3: Create directory structure for program in Hadoop
+```bash
+hadoop fs -mkdir /MaxTemp
+hadoop fs -mkdir /MaxTemp/Input
+hadoop fs -put 'local input file's path ' /MaxTemp/Input
+```
++ Example input:
+
++ ![Input file](images/MaxTempProgram/input.png)
+### Step 4: Create Jar File and deploy it to Hadoop
+```bash
+hadoop jar "Path to your local file .jar" MaxTemp /MaxTemp/Input /MaxTemp/Output
+```
+### Step 5: Final result
++ After succesfully calculating, we can check our result in HDFS like below: 
+
++ ![Output 1](images/MaxTempProgram/output1.png)
+
++ ![Output 2](images/MaxTempProgram/output2.png)
 
 ## 6. AverageSalary Program
 

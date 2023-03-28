@@ -18,11 +18,11 @@ code-block-font-size: \scriptsize
 
 ## 4. Patent Program
 
-### Step 1: Class Creation
-### Step 2: Create directory structure for program in Hadoop
-### Step 3: Program's solution
+
+### Step 1: Program's solution
 
 + Mapper:
+
 ```java
     public static class PatentMapper
             extends Mapper<Object, Text, Text, Text> {
@@ -44,7 +44,7 @@ code-block-font-size: \scriptsize
     }
 ```
 
-+ Reducer
++ Reducer:
 
 ```java
     public static class SumSubPatentReducer
@@ -62,7 +62,7 @@ code-block-font-size: \scriptsize
     }
 ```
 
-+ Main
++ Main:
 
 ```java
     public static void main(String[] args) throws Exception {
@@ -82,14 +82,52 @@ code-block-font-size: \scriptsize
     }
 ```
 
++ The main idea for this program is that collecting pair of token in Map function, after combining, we count them through the their key and write in output file.
+
+### Step 2: Class Creation
+
++ After complete code in Java, we need to generate file jar from builded classes by below command:
+
+```bash
+jar -cvf PatentProgram.jar -C classes/ .
+```
+
++ Notice: Make sure that you export HADOOP_CLASSPATH before buiding file jar
+
+
+### Step 3: Create directory structure for program in Hadoop
+
++ We need to create folder to store input data in HDFS by below command: 
+
+```bash
+hadoop fs -mkdir /PatentProgram
+hadoop fs -mkdir /PatentProgram/Input
+hadoop fs -put "local input file's path" /PatentProgram/Input
+```
+
++ Example input:
+
++ ![Input file](images/PatentProgram/input.png)
+
 ### Step 4: Create Jar File and deploy it to Hadoop
+
+```bash
+hadoop jar "Path to your local file .jar" PatentProgram /PatentProgram/Input /PatentProgram/Output
+```
+
 ### Step 5: Final result
+
++ After succesfully calculating, we can check our result in HDFS like below: 
+
++ ![Output 1](images/PatentProgram/input.png)
+
++ ![Output 2](images/PatentProgram/input.png)
+
+
 
 ## 6. AverageSalary Program
 
-### Step 1: Class Creation
-### Step 2: Create directory structure for program in Hadoop
-### Step 3: Program's solution
+### Step 1: Program's solution
 
 + Mapper:
 ```java
@@ -152,13 +190,50 @@ code-block-font-size: \scriptsize
     }
 ```
 
++ In Map function, we will collect employee's ID with their salary to make a pair. Then in Reducer, we will take average salary of each employee's ID to write in the output. 
+
+
+### Step 2: Class Creation
+
++ After complete code in Java, we need to generate file jar from builded classes by below command:
+
+```bash
+jar -cvf AverageSalary.jar -C classes/ .
+```
+
++ Notice: Make sure that you export HADOOP_CLASSPATH before buiding file jar
+
+### Step 3: Create directory structure for program in Hadoop
+
++ We need to create folder to store input data in HDFS by below command: 
+
+```bash
+hadoop fs -mkdir /AverageSalary
+hadoop fs -mkdir /AverageSalary/Input
+hadoop fs -put "local input file's path" /AverageSalary/Input
+```
+
++ Example input:
+
++ ![Input file](images/AverageSalary/input.png)
+
+
 ### Step 4: Create Jar File and deploy it to Hadoop
+
+```bash
+hadoop jar "Path to your local file .jar" AverageSalary /AverageSalary/Input /AverageSalary/Output
+```
+
 ### Step 5: Final result
+
++ After succesfully calculating, we can check our result in HDFS like below: 
+
++ ![Output 1](images/AverageSalary/output1.png)
+
++ ![Output 2](images/AverageSalary/output2.png)
 
 ## 7.  De Identify HealthCare Program
 
-### Step 1: Class Creation
-### Step 2: Create directory structure for program in Hadoop
 ### Step 3: Program's solution
 
 + Mapper
@@ -255,16 +330,51 @@ code-block-font-size: \scriptsize
     }
 ```
 
++ The idea to resolve this question is only using Map function and encrypt function to encrypt data in identified columns which need to be hidden. 
 
+### Step 2: Class Creation
+
++ After complete code in Java, we need to generate file jar from builded classes by below command:
+
+```bash
+jar -cvf DeIdentifyData.jar -C classes/ .
+```
+
++ Notice: Make sure that you export HADOOP_CLASSPATH before buiding file jar
+
+
+### Step 3: Create directory structure for program in Hadoop
+
++ We need to create folder to store input data in HDFS by below command: 
+
+```bash
+hadoop fs -mkdir /DeIdentifyData
+hadoop fs -mkdir /DeIdentifyData/Input
+hadoop fs -put "local input file's path" /DeIdentifyData/Input
+```
+
++ Example input:
+
++ ![Input file](images/DeIdentifyData/input.png)
 
 ### Step 4: Create Jar File and deploy it to Hadoop
+
+```bash
+hadoop jar "Path to your local file .jar" DeIdentifyData /DeIdentifyData/Input /DeIdentifyData/Output
+```
+
 ### Step 5: Final result
+
++ After succesfully calculating, we can check our result in HDFS like below: 
+
++ ![Output 1](images/DeIdentifyData/output1.png)
+
++ ![Output 2](images/DeIdentifyData/output2.png)
 
 ## 10. Count Connected Components Program
 
-### Step 1: Class Creation
-### Step 2: Create directory structure for program in Hadoop
-### Step 3: Program's solution
+
+### Step 1: Program's solution
 
 + Mapper
 
@@ -361,64 +471,81 @@ code-block-font-size: \scriptsize
     }
 ```
 
++ This task is an intriguing question that calculate numbers of separated components in a graph. To resolve this problem, we put pair of source and destination point of every edges in graph to reducer. We put all pairs to TreeMap to sort them. Then in each components, we mark all connected vertices value to smallest vertex. Finally, the result equals numbers of different values in HashMap.   
+
+
+### Step 2: Class Creation
+
++ After complete code in Java, we need to generate file jar from builded classes by below command:
+
+```bash
+jar -cvf CountConnectedComponentProgram.jar -C classes/ .
+```
+
++ Notice: Make sure that you export HADOOP_CLASSPATH before buiding file jar
+
+
+
+### Step 3: Create directory structure for program in Hadoop
+
++ We need to create folder to store input data in HDFS by below command: 
+
+```bash
+hadoop fs -mkdir /CountConnectedComponentProgram
+hadoop fs -mkdir /CountConnectedComponentProgram/Input
+hadoop fs -put "local input file's path" /CountConnectedComponentProgram/Input
+```
+
++ Example input:
+
++ ![Input file](images/CountConnectedComponentProgram/input.png)
 
 
 ### Step 4: Create Jar File and deploy it to Hadoop
-### Step 5: Final result
-
-
-# Example
-Insert table example:
-
-Server IP Address | Ports Open
-------------------|----------------------------------------
-192.168.1.1       | **TCP**: 21,22,25,80,443
-192.168.1.2       | **TCP**: 22,55,90,8080,80
-192.168.1.3       | **TCP**: 1433,3389\
-**UDP**: 1434,161
-
-Code example:
-
-```python
-print("Hello")
-```
 
 ```bash
-cat ~/.bashrc
+hadoop jar "Path to your local file .jar" CountConnectedComponentProgram /CountConnectedComponentProgram/Input /CountConnectedComponentProgram/Output
 ```
 
-Screenshot example:
 
-![Proof of change your shell prompt's name](images/changeps1.png)
+### Step 5: Final result
 
-\newpage
++ After succesfully calculating, we can check our result in HDFS like below: 
 
-Screenshot example:
++ ![Output 1](images/CountConnectedComponentProgram/output1.png)
 
-![ImgPlaceholder](images/placeholder-image-300x225.png)
++ ![Output 2](images/CountConnectedComponentProgram/output2.png)
 
-Reference examples:
 
-Some text in which I cite an author.[^fn1]
 
-More text. Another citation.[^fn2]
+## Self-reflection
 
-What is this? Yet _another_ citation?[^fn3]
+### 20127435 - Tran Van An
 
++ After completing above tasks, I know more about the useful of MapReduce in handle real-problems in many aspects as well as get experiences in MapReduce Programing for the midterm test.
+
+
+
+## Member's contribution
+
+Task | Result
+----------------------------------------|----------
+4.PatentProgram                         | 100%
+6.Average Salary                        | 100%
+7.De Identify Data                      | 100%
+10.Count Connected Components           | 100%
+
+
+MSSV | Member | Contribution Percentage
+-----|------------------|---------------
+20127435 | Tran Van An       | 25%
+20127395 | Phan Minh Xuan    | 25%
+20127032 | Bui Gia Huy       | 25%
+20127631 | Thai Van Thien    | 25%
 
 ## References
-<!-- References without citing, this will be display as resources -->
-- Three Cloudera version of WordCount problem:
-    - https://docs.cloudera.com/documentation/other/tutorial/CDH5/topics-/ht_wordcount1.html
-    - https://docs.cloudera.com/documentation/other/tutorial/CDH5/topics/ht_wordcount2.html
-    - https://docs.cloudera.com/documentation/other/tutorial/CDH5/topics/ht_wordcount3.html
-- Book: MapReduce Design Patterns [Donald Miner, Adam Shook, 2012]
-- All of StackOverflow link related.
 
-<!-- References with citing, this will be display as footnotes -->
-[^fn1]: So Chris Krycho, "Not Exactly a Millennium," chriskrycho.com, July 2015, http://v4.chriskrycho.com/2015/not-exactly-a-millennium.html
-(accessed July 25, 2015)
 
-[^fn2]: Contra Krycho, 15, who has everything _quite_ wrong.
 
-[^fn3]: ibid
+
+

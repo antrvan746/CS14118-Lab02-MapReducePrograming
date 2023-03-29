@@ -221,9 +221,9 @@ hadoop jar "Path to your local file .jar" PatentProgram /PatentProgram/Input /Pa
 
 + After succesfully calculating, we can check our result in HDFS like below: 
 
-+ ![Output 1](images/PatentProgram/input.png)
++ ![Output 1](images/PatentProgram/output1.png)
 
-+ ![Output 2](images/PatentProgram/input.png)
++ ![Output 2](images/PatentProgram/output2.png)
 
 
 

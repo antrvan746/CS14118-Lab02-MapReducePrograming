@@ -17,7 +17,6 @@ code-block-font-size: \scriptsize
 
 ## 1. WordCount Program
 
-
 ### Step 1: Program's solution
 + Import: 
 ```java
@@ -52,7 +51,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
   }
   ``` 
 + Reducer:
-
 ```java
   public static class IntSumReducer
        extends Reducer<Text,IntWritable,Text,IntWritable> {
@@ -87,7 +85,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
   }
 }
 ```
-+ Explace:
++ Explain:
 + In the mapper method: This mapper will take as input an Object (representing the key), and a Text (representing the value) and use the StringTokenizer to separate the words in the value. Then it sends each word to the Reducer with a value of 1.
 + In the reducer metho: This reducer will take the words from the Mapper and calculate the total number of occurrences of each word by adding the values of 1s together.
 
@@ -115,14 +113,111 @@ hadoop jar "Path to your local file .jar" WordCount /WordCount/Input /WordCount/
 
 + ![Output 2](images/WordCountProgram/output2.png)
 
+---
 
+## 3. WeatherData program
 
+### Step 1: Program's solution
++ Import: 
+```java
+import java.io.IOException;
+import java.util.Iterator;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+``` 
++ Mapper:
+```java
+  public static class Map
+            extends Mapper<Object, Text, Text, Text>{
+
+        public void map(Object key, Text value, Context context
+        ) throws IOException, InterruptedException {
+            String line = value.toString();
+            String[] tokens = line.split("\\s+");
+            String date = tokens[1];
+            float tempMax = Float.parseFloat(tokens[6].trim());
+            float tempMin = Float.parseFloat(tokens[7].trim());
+
+            if(tempMax > 40.0) {
+                context.write(new Text("Hot Day " + date), new Text(String.valueOf(tempMax)));
+            }
+            if(tempMin < 10.0) {
+                context.write(new Text("Cold Day " + date), new Text(String.valueOf(tempMin)));
+            }
+
+        }
+    }
+  ``` 
+
++ Reducer:
+```java
+public static class Reduce
+            extends Reducer<Text,Text,Text,Text>{
+
+        public void reduce(Text key, Iterator<Text> values,
+                           Context context
+        ) throws IOException, InterruptedException {
+            String temperature = values.next().toString();
+            context.write(key, new Text(temperature));
+        }
+    }
+```
+
++ Main:
+```java
+public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        Job job = Job.getInstance(conf, "weather");
+        job.setJarByClass(WeatherData.class);
+        job.setMapperClass(Map.class);
+        job.setCombinerClass(Reduce.class);
+        job.setReducerClass(Reduce.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(Text.class);
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
+```
++ Explain:
++ In the mapper method: This mapper will take as input an Object (representing the key), and a Text (representing the value) and use the `split()` method to separate the fields in a line (inside is a regular expression indicate one or more whitespace). It then extract the date, minTemp and maxTemp (at index 1, 6, 7 respectively). Then, it check for the conditions (tempMax > 40 or tempMin < 10) and write the coressponding output to the context.
++ In the reducer metho: This reducer will take the words from the Mapper and print out the result.
+
+### Step 2: Class Creation
+```bash
+jar -cvf WeatherData.jar -C classes/ .
+```
+### Step 3: Create directory structure for program in Hadoop
+```bash
+hadoop fs -mkdir /Weather
+hadoop fs -mkdir /Weather/Input
+hadoop fs -put 'local input file's path ' /Weather/Input
+```
++ Example input:
+
++ ![Input file](images/WordCountProgram/input.png)
+### Step 4: Create Jar File and deploy it to Hadoop
+```bash
+hadoop jar "Path to your local file .jar" WeatherData /Weather/Input /Weather/Output
+```
+### Step 5: Final result
++ After succesfully calculating, we can check our result in HDFS like below: 
+
++ ![Output 1](images/WordCountProgram/output1.png)
+
++ ![Output 2](images/WordCountProgram/output2.png)
+
+---
 
 ## 4. Patent Program
 
-
 ### Step 1: Program's solution
-
 
 + Mapper:
 ```java
@@ -147,7 +242,6 @@ hadoop jar "Path to your local file .jar" WordCount /WordCount/Input /WordCount/
 ```
 
 + Reducer:
-
 ```java
     public static class SumSubPatentReducer
             extends Reducer<Text, Text, Text, Text> {
@@ -165,7 +259,6 @@ hadoop jar "Path to your local file .jar" WordCount /WordCount/Input /WordCount/
 ```
 
 + Main:
-
 ```java
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
@@ -196,7 +289,6 @@ jar -cvf PatentProgram.jar -C classes/ .
 
 + Notice: Make sure that you export HADOOP_CLASSPATH before buiding file jar
 
-
 ### Step 3: Create directory structure for program in Hadoop
 
 + We need to create folder to store input data in HDFS by below command: 
@@ -225,12 +317,12 @@ hadoop jar "Path to your local file .jar" PatentProgram /PatentProgram/Input /Pa
 
 + ![Output 2](images/PatentProgram/output2.png)
 
-
+---
 
 ## 5. MaxTemp Program
 
-
 ### Step 1: Program's solution
+
 + Import: 
 ```java
 import java.io.IOException;
@@ -244,6 +336,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 ```
+
 + Mapper:
 ```java
   public static class MaxTemperatureMapper
@@ -260,6 +353,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
     }
   }
 ```
+
 + Reducer: 
 ```java
   public static class MaxTemperatureReducer
@@ -276,6 +370,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
     }
   }
 ```
+
 + Main:
 ```java
   public static void main(String[] args) throws Exception {
@@ -293,7 +388,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
   }
 }
 ``` 
-+ Explace:
++ Explain:
 + In the mapper method, we extract the year and temperature from each input line and write them to the key/value pair. We do not need to verify the format of the input stream because in this case all the lines have the same format and we can simply use fixed indexes to extract the information. 
 + In the reduce method, we find the highest temperature for each year by traversing the list of pooled values for the same key.
 
@@ -344,7 +439,6 @@ hadoop jar "Path to your local file .jar" MaxTemp /MaxTemp/Input /MaxTemp/Output
 ```
 
 + Reducer
-
 ```java
     public static class AvgReducer
             extends Reducer<Text, FloatWritable, Text, FloatWritable> {
@@ -367,7 +461,6 @@ hadoop jar "Path to your local file .jar" MaxTemp /MaxTemp/Input /MaxTemp/Output
 ```
 
 + Main
-
 ```java
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
@@ -427,6 +520,8 @@ hadoop jar "Path to your local file .jar" AverageSalary /AverageSalary/Input /Av
 + ![Output 1](images/AverageSalary/output1.png)
 
 + ![Output 2](images/AverageSalary/output2.png)
+
+---
 
 ## 7.  De Identify HealthCare Program
 
@@ -500,7 +595,6 @@ hadoop jar "Path to your local file .jar" AverageSalary /AverageSalary/Input /Av
 ```
 
 + Main
-
 ```java
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
@@ -567,13 +661,133 @@ hadoop jar "Path to your local file .jar" DeIdentifyData /DeIdentifyData/Input /
 
 + ![Output 2](images/DeIdentifyData/output2.png)
 
-## 10. Count Connected Components Program
+---
 
+## 9. Telecom Call Data Record Program
+
+### Step 1: Program's solution
++ Import: 
+```java
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+``` 
++ Mapper:
+```java
+public static class Map
+            extends Mapper<Object, Text, Text, LongWritable>{
+
+        Text phoneNumber = new Text();
+        LongWritable minutes = new LongWritable();
+
+        public void map(Object key, Text value, Context context
+        ) throws IOException, InterruptedException {
+            String line = value.toString();
+            String[] tokens = line.split("\\|");
+            if(tokens[4].equals("1")) {
+                phoneNumber.set(tokens[0]);
+                minutes.set(calculateTimeInMinutes(tokens[2], tokens[3]));
+                context.write(phoneNumber, minutes);
+            }
+        }
+
+        private long calculateTimeInMinutes(String start, String end) {
+            SimpleDateFormat formatter = new SimpleDateFormat(("yyyy-MM-dd HH:mm:ss"));
+            long minutes = -1; // if this value happen then there's an error
+            try {
+                // put code in try catch so that java is not angry
+                Date startDate = formatter.parse(start);
+                Date endDate = formatter.parse(end);
+                long duration = endDate.getTime() - startDate.getTime();
+                minutes = duration / (1000 * 60);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return minutes;
+        }
+    }
+``` 
++ Reducer:
+
+```java
+public static class Reduce
+            extends Reducer<Text,LongWritable,Text,LongWritable>{
+
+        public void reduce(Text key, Iterable<LongWritable> values,
+                           Context context
+        ) throws IOException, InterruptedException {
+            long totalMinutes = 0;
+            for(LongWritable val: values) {
+                totalMinutes += val.get();
+            }
+            if(totalMinutes > 60) {
+                context.write(key, new LongWritable(totalMinutes));
+            }
+
+        }
+    }
+```
++ Main:
+```java
+public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        Job job = Job.getInstance(conf, "call data record");
+        job.setJarByClass(CallDataRecord.class);
+        job.setMapperClass(Map.class);
+        job.setCombinerClass(Reduce.class);
+        job.setReducerClass(Reduce.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(LongWritable.class);
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
+```
++ Explain:
++ In the mapper method: This mapper will take as input an Object (representing the key), and a Text (representing the value) and use the `split()` method to separate the fields in a line (inside is a regular expression indicate a "|" character). It then check if the std is equal to 1. If true, it will write the FromPhoneNumber and the time in minute (calculate using the calculateTimeInMinutes() utility function) to the context.
++ In the reducer metho: This reducer will take the words from the Mapper and add all the values together, it then write the result to the context if the total is greater than 60.
+
+### Step 2: Class Creation
+```bash
+jar -cvf CallDataRecord.jar -C classes/ .
+```
+### Step 3: Create directory structure for program in Hadoop
+```bash
+hadoop fs -mkdir /CallDataRecord
+hadoop fs -mkdir /CallDataRecord/Input
+hadoop fs -put 'local input file's path ' /CallDataRecord/Input
+```
++ Example input:
+
++ ![Input file](images/WordCountProgram/input.png)
+### Step 4: Create Jar File and deploy it to Hadoop
+```bash
+hadoop jar "Path to your local file .jar" CallDataRecord /CallDataRecord/Input /CallDataRecord/Output
+```
+### Step 5: Final result
++ After succesfully calculating, we can check our result in HDFS like below: 
+
++ ![Output 1](images/WordCountProgram/output1.png)
+
++ ![Output 2](images/WordCountProgram/output2.png)
+
+---
+
+## 10. Count Connected Components Program
 
 ### Step 1: Program's solution
 
 + Mapper
-
 ```java
     public static class Map
             extends Mapper<Object, Text, Text, Text> {
@@ -595,7 +809,6 @@ hadoop jar "Path to your local file .jar" DeIdentifyData /DeIdentifyData/Input /
 ```
 
 + Reducer
-
 ```java
     public static class Reduce
             extends Reducer<Text, Text, Text, Text> {
@@ -647,7 +860,6 @@ hadoop jar "Path to your local file .jar" DeIdentifyData /DeIdentifyData/Input /
 ```
 
 + Main
-
 ```java
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
@@ -669,7 +881,6 @@ hadoop jar "Path to your local file .jar" DeIdentifyData /DeIdentifyData/Input /
 
 + This task is an intriguing question that calculate numbers of separated components in a graph. To resolve this problem, we put pair of source and destination point of every edges in graph to reducer. We put all pairs to TreeMap to sort them. Then in each components, we mark all connected vertices value to smallest vertex. Finally, the result equals numbers of different values in HashMap.   
 
-
 ### Step 2: Class Creation
 
 + After complete code in Java, we need to generate file jar from builded classes by below command:
@@ -679,8 +890,6 @@ jar -cvf CountConnectedComponentProgram.jar -C classes/ .
 ```
 
 + Notice: Make sure that you export HADOOP_CLASSPATH before buiding file jar
-
-
 
 ### Step 3: Create directory structure for program in Hadoop
 
@@ -712,15 +921,13 @@ hadoop jar "Path to your local file .jar" CountConnectedComponentProgram /CountC
 
 + ![Output 2](images/CountConnectedComponentProgram/output2.png)
 
-
+---
 
 ## Self-reflection
 
 ### 20127435 - Tran Van An
 
 + After completing above tasks, I know more about the useful of MapReduce in handle real-problems in many aspects as well as get experiences in MapReduce Programing for the midterm test.
-
-
 
 ## Member's contribution
 
@@ -731,6 +938,18 @@ Task | Result
 7.De Identify Data                      | 100%
 10.Count Connected Components           | 100%
 
+### 20127032 - Bui Gia Huy
+
++ After completing above tasks, I know how to set up and manipulate a basic map reduce program, as well as transforming data using java utility class, as well as familiarize myself with java syntax.
+
+## Member's contribution
+
+Task | Result
+----------------------------------------|----------
+3.Weather Data                          | 100%
+9.Telecom Call Data Record Program      | 100%
+
+---
 
 MSSV | Member | Contribution Percentage
 -----|------------------|---------------
@@ -738,6 +957,7 @@ MSSV | Member | Contribution Percentage
 20127395 | Phan Minh Xuan    | 25%
 20127032 | Bui Gia Huy       | 25%
 20127631 | Thai Van Thien    | 25%
+
 
 ## References
 

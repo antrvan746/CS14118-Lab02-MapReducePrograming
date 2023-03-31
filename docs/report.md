@@ -301,7 +301,7 @@ hadoop fs -put 'local input file's path ' /Weather/Input
 ```
 + Example input:
 
-+ ![Input file](images/WordCountProgram/input.png)
++ ![Input file](images/WeatherData/input.jpg)
 ### Step 4: Create Jar File and deploy it to Hadoop
 ```bash
 hadoop jar "Path to your local file .jar" WeatherData /Weather/Input /Weather/Output
@@ -309,9 +309,9 @@ hadoop jar "Path to your local file .jar" WeatherData /Weather/Input /Weather/Ou
 ### Step 5: Final result
 + After succesfully calculating, we can check our result in HDFS like below: 
 
-+ ![Output 1](images/WordCountProgram/output1.png)
++ ![Output 1](images/WeatherData/output1.jpg)
 
-+ ![Output 2](images/WordCountProgram/output2.png)
++ ![Output 2](images/WeatherData/output2.jpg)
 
 ---
 
@@ -1254,23 +1254,23 @@ jar -cvf CallDataRecord.jar -C classes/ .
 ```
 ### Step 3: Create directory structure for program in Hadoop
 ```bash
-hadoop fs -mkdir /CallDataRecord
-hadoop fs -mkdir /CallDataRecord/Input
-hadoop fs -put 'local input file's path ' /CallDataRecord/Input
+hadoop fs -mkdir /Phone
+hadoop fs -mkdir /Phone/Input
+hadoop fs -put 'local input file's path ' /Phone/Input
 ```
 + Example input:
 
-+ ![Input file](images/WordCountProgram/input.png)
++ ![Input file](images/CallDataRecord/input.jpg)
 ### Step 4: Create Jar File and deploy it to Hadoop
 ```bash
-hadoop jar "Path to your local file .jar" CallDataRecord /CallDataRecord/Input /CallDataRecord/Output
+hadoop jar "Path to your local file .jar" CallDataRecord /Phone/Input /Phone/Output
 ```
 ### Step 5: Final result
 + After succesfully calculating, we can check our result in HDFS like below: 
 
-+ ![Output 1](images/WordCountProgram/output1.png)
++ ![Output 1](images/CallDataRecord/output1.jpg)
 
-+ ![Output 2](images/WordCountProgram/output2.png)
++ ![Output 2](images/CallDataRecord/output2.jpg)
 
 ---
 

@@ -763,6 +763,397 @@ hadoop jar "Path to your local file .jar" DeIdentifyData /DeIdentifyData/Input /
 
 ---
 
+## 8 Music Track Program
+
+### Step 1: Program's solution
+- task1: Number of unique listeners
++ Import: 
+```java
+import java.util.*;
+import java.io.IOException;
+import java.util.StringTokenizer;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+``` 
++ Mapper:
+```java
+  public static class Map extends Mapper<Object, Text, IntWritable, IntWritable> {
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            String line = value.toString();
+            String[] data = line.split(",");
+            IntWritable user = new IntWritable(Integer.parseInt(data[UserId]));
+            IntWritable track = new IntWritable(Integer.parseInt(data[TrackId]));
+            context.write(track, user);
+
+        }
+    }
+  ``` 
++ Reducer:
+```java
+  public static class Reduce extends Reducer<IntWritable, IntWritable, IntWritable, IntWritable> {
+        public void reduce(IntWritable key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+            Set<Integer> users = new HashSet<Integer>();
+            for (IntWritable val : values) {
+                users.add(val.get());
+            }
+            IntWritable result = new IntWritable(users.size());
+            context.write(key, result);
+        }
+    }
+```
++ Main:
+```java
+  public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        Job job = new Job(conf, "Listener");
+        job.setJarByClass(Listener.class);
+        job.setOutputKeyClass(IntWritable.class);
+        job.setOutputValueClass(IntWritable.class);
+        job.setMapperClass(Map.class);
+        job.setCombinerClass(Reduce.class);
+        job.setReducerClass(Reduce.class);
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        job.setInputFormatClass(TextInputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
+        job.waitForCompletion(true);
+    }
+```
++ Explain:
++ In the mapper method: This mapper will take as input an Object (representing the key), and a Text (representing the value) and use the String[] to separate the data in the value. Then it sends each pair<trackId,userId> to the Reducer.
++ In the reducer method: This reducer will take the pair<trackId,userId> from the Mapper and add it into Set(HashSet) then return <key,Set.size()).
+
+- task2: Number of times the track was shared with others
++ Import: 
+```java
+import java.util.*;
+import java.io.IOException;
+import java.util.StringTokenizer;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+``` 
++ Mapper:
+```java
+  public static class Map extends Mapper<Object, Text, Text, IntWritable> {
+        private Text track = new Text();
+
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            String line = value.toString();
+            String[] data = line.split(",");
+            track = new Text(data[TrackId]);
+            context.write(track, new IntWritable(Integer.valueOf(data[Shared])));
+        }
+    }
+  ``` 
++ Reducer:
+```java
+  public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> {
+        public void reduce(Text key, Iterable<IntWritable> values, Context context)
+                throws IOException, InterruptedException {
+            int sum = 0;
+            for (IntWritable val : values) {
+                sum = sum + val.get();
+            }
+            context.write(key, new IntWritable(sum));
+        }
+    }
+```
++ Main:
+```java
+  public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        Job job = new Job(conf, "Shared");
+        job.setJarByClass(Shared.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+        job.setMapperClass(Map.class);
+        job.setCombinerClass(Reduce.class);
+        job.setReducerClass(Reduce.class);
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        job.setInputFormatClass(TextInputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
+        job.waitForCompletion(true);
+    }
+```
++ Explain:
++ In the mapper method: This mapper will take as input an Object (representing the key), and a Text (representing the value) and use the String[] to separate the data in the value. Then it sends each pair<trackId,Shared> to the Reducer.
++ In the reducer method: This reducer will take the pair<trackId,Shared> from the Mapper and calculate the total number of each track was shared with orthers by adding the values of 1s together..
+
+- task3: Number of times the track was listened to on the radio
++ Import: 
+```java
+import java.util.*;
+import java.io.IOException;
+import java.util.StringTokenizer;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+``` 
++ Mapper:
+```java
+   public static class Map extends Mapper<Object, Text, Text, IntWritable> {
+        private Text track = new Text();
+
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            String line = value.toString();
+            String[] data = line.split(",");
+            track = new Text(data[TrackId]);
+            context.write(track, new IntWritable(Integer.valueOf(data[Radio])));
+        }
+    }
+  ``` 
++ Reducer:
+```java
+  public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> {
+        public void reduce(Text key, Iterable<IntWritable> values, Context context)
+                throws IOException, InterruptedException {
+            int sum = 0;
+            for (IntWritable val : values) {
+                sum = sum + val.get();
+            }
+            context.write(key, new IntWritable(sum));
+        }
+    }
+```
++ Main:
+```java
+  public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        Job job = new Job(conf, "Radio");
+        job.setJarByClass(Radio.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+        job.setMapperClass(Map.class);
+        job.setCombinerClass(Reduce.class);
+        job.setReducerClass(Reduce.class);
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        job.setInputFormatClass(TextInputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
+        job.waitForCompletion(true);
+    }
+```
++ Explain:
++ In the mapper method: This mapper will take as input an Object (representing the key), and a Text (representing the value) and use the String[] to separate the data in the value. Then it sends each pair<trackId,Radio> to the Reducer.
++ In the reducer method: This reducer will take the pair<trackId,Radio> from the Mapper and calculate the total number of each track was listened to on radio by adding the values of 1s together..
+
+- task4: Number of times the track was listened to in total
++ Import: 
+```java
+import java.util.*;
+import java.io.IOException;
+import java.util.StringTokenizer;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+``` 
++ Mapper:
+```java
+   public static class Map extends Mapper<Object, Text, Text, IntWritable> {
+        private Text track = new Text();
+
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            String line = value.toString();
+            String[] data = line.split(",");
+            track = new Text(data[TrackId]);
+            context.write(track, new IntWritable(Integer.valueOf(data[Skip])));
+        }
+    }
+  ``` 
++ Reducer:
+```java
+  public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> {
+        public void reduce(Text key, Iterable<IntWritable> values, Context context)
+                throws IOException, InterruptedException {
+            int sum = 0;
+            for (IntWritable val : values) {
+                if (val.get() == 0)
+                    sum++;
+            }
+            context.write(key, new IntWritable(sum));
+        }
+    }
+```
++ Main:
+```java
+  public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        Job job = new Job(conf, "Total");
+        job.setJarByClass(Total.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+        job.setMapperClass(Map.class);
+        job.setCombinerClass(Reduce.class);
+        job.setReducerClass(Reduce.class);
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        job.setInputFormatClass(TextInputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
+        job.waitForCompletion(true);
+    }
+```
++ Explain:
++ In the mapper method: This mapper will take as input an Object (representing the key), and a Text (representing the value) and use the String[] to separate the data in the value. Then it sends each pair<trackId,Skip> to the Reducer.
++ In the reducer method: This reducer will take the pair<trackId,Skip> from the Mapper and calculate the total number of each track was'n skipped by adding the values of 1s together..
+
+- task5: Number of times the track was skipped on the radio
++ Import: 
+```java
+import java.util.*;
+import java.io.IOException;
+import java.util.StringTokenizer;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+``` 
++ Mapper:
+```java
+   public static class Map extends Mapper<Object, Text, Text, IntWritable> {
+        private Text track = new Text();
+
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+            String line = value.toString();
+            String[] data = line.split(",");
+            track = new Text(data[TrackId]);
+            if (data[Radio].equals("0") || data[Skip].equals("0"))
+                context.write(track, new IntWritable(0));
+            else
+                context.write(track, new IntWritable(1));
+
+        }
+    }
+  ``` 
++ Reducer:
+```java
+  public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> {
+        public void reduce(Text key, Iterable<IntWritable> values, Context context)
+                throws IOException, InterruptedException {
+            int sum = 0;
+            for (IntWritable val : values) {
+                sum = sum + val.get();
+            }
+            context.write(key, new IntWritable(sum));
+        }
+    }
+```
++ Main:
+```java
+  public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        Job job = new Job(conf, "Skip_Radio");
+        job.setJarByClass(Skip_Radio.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+        job.setMapperClass(Map.class);
+        job.setCombinerClass(Reduce.class);
+        job.setReducerClass(Reduce.class);
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        job.setInputFormatClass(TextInputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
+        job.waitForCompletion(true);
+    }
+```
++ Explain:
++ In the mapper method: This mapper will take as input an Object (representing the key), and a Text (representing the value) and use the String[] to separate the data in the value. Then it sends each pair<trackId,Skip&Radio> to the Reducer.
++ In the reducer method: This reducer will take the pair<trackId,Skip&Radio> from the Mapper and calculate the total number of each track was skipped on the radio by adding the values of 1s together..
+
+### Step 2: Class Creation
+```bash
+jar -cvf fileName.jar -C classes/ .
+```
+### Step 3: Create directory structure for program in Hadoop
+```bash
+hadoop fs -mkdir /fileName
+hadoop fs -mkdir /fileName/Input
+hadoop fs -put 'local input file's path ' /fileName/Input
+```
++ Example input:
+
++ ![Input file](images/MusicTrackProgram/input.jpg)
+### Step 4: Create Jar File and deploy it to Hadoop
+```bash
+hadoop jar "Path to your local file .jar" WordCount /WordCount/Input /WordCount/Output
+```
+### Step 5: Final result
++ After succesfully calculating, we can check our result in HDFS like below: 
+- task1:
++ ![Output 1](images/MusicTrackProgram/Listener/output1.jpg)
+
++ ![Output 2](images/MusicTrackProgram/Listener/output2.jpg)
+ - task2:
++ ![Output 1](images/MusicTrackProgram/Shared/output1.jpg)
+
++ ![Output 2](images/MusicTrackProgram/Shared/output2.jpg)
+ - task3:
++ ![Output 1](images/MusicTrackProgram/Radio/output1.jpg)
+
++ ![Output 2](images/MusicTrackProgram/Radio/output2.jpg)
+ - task4:
++ ![Output 1](images/MusicTrackProgram/Total/output1.jpg)
+
++ ![Output 2](images/MusicTrackProgram/Total/output2.jpg)
+ - task5:
++ ![Output 1](images/MusicTrackProgram/Skip_Radio/output1.jpg)
+
++ ![Output 2](images/MusicTrackProgram/Skip_Radio/output2.jpg)
+
+---
+
+
 ## 9. Telecom Call Data Record Program
 
 ### Step 1: Program's solution

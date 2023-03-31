@@ -115,6 +115,106 @@ hadoop jar "Path to your local file .jar" WordCount /WordCount/Input /WordCount/
 
 ---
 
+## 2. WordSizeWordCount Program
+
+### Step 1: Program's solution
++ Import: 
+```java
+import java.util.*;
+import java.io.IOException;
+import java.util.StringTokenizer;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+``` 
++ Mapper:
+```java
+  public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
+        private final static IntWritable one = new IntWritable(1);
+        private Text word = new Text();
+
+        public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+            String line = value.toString();
+            StringTokenizer tokenizer = new StringTokenizer(line);
+            while (tokenizer.hasMoreTokens()) {
+            	
+                word.set(tokenizer.nextToken());
+		String length = String.valueOf(word.getLength());
+		Text len = new Text(length);
+                context.write(len, one);
+            }
+        }
+    }
+  ``` 
++ Reducer:
+```java
+  public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> {
+        public void reduce(Text key, Iterable<IntWritable> values, Context context)
+                throws IOException, InterruptedException
+
+        {
+            int sum = 0;
+            for (IntWritable val : values) {
+                sum += val.get();
+            }
+            context.write(key, new IntWritable(sum));
+        }
+    }
+```
++ Main:
+```java
+  public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+		    Job job = new Job(conf, "WordSizeWordCount");
+        job.setJarByClass(WordSizeWordCount.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(IntWritable.class);
+        job.setMapperClass(Map.class);
+        job.setCombinerClass(Reduce.class);
+        job.setReducerClass(Reduce.class);
+        job.setInputFormatClass(TextInputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
+        FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        job.waitForCompletion(true);
+    }
+```
++ Explain:
++ In the mapper method: This mapper will take as input an Object (representing the key), and a Text (representing the value) and use the StringTokenizer to separate the words in the value. Then it sends each word's length to the Reducer with a value of 1.
++ In the reducer metho: This reducer will take the word's length from the Mapper and calculate the total number of occurrences of each word's length by adding the values of 1s together.
+
+### Step 2: Class Creation
+```bash
+jar -cvf WordSizeWordCount.jar -C classes/ .
+```
+### Step 3: Create directory structure for program in Hadoop
+```bash
+hadoop fs -mkdir /WordSizeWordCount
+hadoop fs -mkdir /WordSizeWordCount
+hadoop fs -put 'local input file's path ' /WordSizeWordCount/Input
+```
++ Example input:
+
++ ![Input file](images/WordSizeWordCount/input.jpg)
+### Step 4: Create Jar File and deploy it to Hadoop
+```bash
+hadoop jar "Path to your local file .jar" WordSizeWordCount /WordSizeWordCount/Input /WordSizeWordCount/Output
+```
+### Step 5: Final result
++ After succesfully calculating, we can check our result in HDFS like below: 
+
++ ![Output 1](images/WordSizeWordCount/output1.jpg)
+
++ ![Output 2](images/WordSizeWordCount/output2.jpg)
+
+---
+
 ## 3. WeatherData program
 
 ### Step 1: Program's solution

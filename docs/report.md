@@ -929,15 +929,6 @@ hadoop jar "Path to your local file .jar" CountConnectedComponentProgram /CountC
 
 + After completing above tasks, I know more about the useful of MapReduce in handle real-problems in many aspects as well as get experiences in MapReduce Programing for the midterm test.
 
-## Member's contribution
-
-Task | Result
-----------------------------------------|----------
-4.PatentProgram                         | 100%
-6.Average Salary                        | 100%
-7.De Identify Data                      | 100%
-10.Count Connected Components           | 100%
-
 ### 20127032 - Bui Gia Huy
 
 + After completing above tasks, I know how to set up and manipulate a basic map reduce program, as well as transforming data using java utility class, as well as familiarize myself with java syntax.
@@ -946,10 +937,13 @@ Task | Result
 
 Task | Result
 ----------------------------------------|----------
+4.PatentProgram                         | 100%
+6.Average Salary                        | 100%
+7.De Identify Data                      | 100%
+10.Count Connected Components           | 100%
 3.Weather Data                          | 100%
 9.Telecom Call Data Record Program      | 100%
 
----
 
 MSSV | Member | Contribution Percentage
 -----|------------------|---------------

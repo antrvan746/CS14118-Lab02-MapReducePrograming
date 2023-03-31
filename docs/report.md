@@ -1,7 +1,7 @@
 ---
 title: "Lab 02: Map Reduce Programming"
-author: ["your-team-name"]
-date: "2023-02-17"
+author: "X-HAT"
+date: "2023-03-31"
 subtitle: "CSC14118 Introduction to Big Data 20KHMT1"
 lang: "en"
 titlepage: true
@@ -1418,7 +1418,7 @@ hadoop jar "Path to your local file .jar" CountConnectedComponentProgram /CountC
 
 ### 20127435 - Tran Van An
 
-+ After completing above tasks, I know more about the useful of MapReduce in handle real-problems in many aspects as well as get experiences in MapReduce Programing for the midterm test.
++ After completing above tasks, I know more about the useful of MapReduce in real-problems in many aspects as well as get experiences in MapReduce Programing for the midterm test.
 
 ### 20127395 - Phan Minh Xuan
 
@@ -1431,6 +1431,7 @@ hadoop jar "Path to your local file .jar" CountConnectedComponentProgram /CountC
 ### 20127631 - Thai Van Thien
 
 + After completing the above tasks, I know how to set up and work with a basic map reduction program and have a preparation for the midterm exam.
+
 ## Member's contribution
 
 Task | Result
@@ -1457,6 +1458,8 @@ MSSV | Member | Contribution Percentage
 
 
 ## References
+
++ Lab requirement pdf
 
 
 
